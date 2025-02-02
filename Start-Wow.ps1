@@ -40,6 +40,7 @@ function Get-BattleNet {
     $BattleNetPath = Get-ChildItem -Path 'C:\' -Recurse -Filter 'Battle.net.exe' -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'Battle.net.exe' } | Select-Object -ExpandProperty FullName -First 1
     Return $BattleNetPath
 }
+# Search for the wow installation path
 $WowInstallationPath = Get-Wow
 # Remove potential double \\ for better readability
 $WowAddonPath = "$($WowInstallationPath)\Interface\AddOns\" -replace '\\\\','\'

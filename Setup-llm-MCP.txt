@@ -19,3 +19,5 @@ Some commands :
 	To confirm GPU access is working inside Docker, run the following:
 		docker run --rm -it --gpus=all nvcr.io/nvidia/k8s/cuda-sample:nbody nbody -gpu -benchmark
 
+N8N license : 	c0eb8217-3e3f-41f2-b15d-a6d66042d94d
+

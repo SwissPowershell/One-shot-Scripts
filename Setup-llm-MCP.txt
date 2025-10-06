@@ -1,0 +1,21 @@
+How to :
+	https://www.youtube.com/watch?v=7qrruzYC0b4
+
+
+Setup a local LLM + MCP Server on Windows 11
+
+1°	Download and install Docker	https://www.docker.com/products/docker-desktop/
+	Configure :
+		Enable Nvidia GPU support :	
+2°	Download and install GIT	https://git-scm.com/
+3°	Download and install VSCode	https://code.visualstudio.com/
+4°	Setup the Self-Hosted-Ai-Starter-Kit
+					https://github.com/n8n-io/self-hosted-ai-starter-kit
+
+
+
+Some commands :
+
+	To confirm GPU access is working inside Docker, run the following:
+		docker run --rm -it --gpus=all nvcr.io/nvidia/k8s/cuda-sample:nbody nbody -gpu -benchmark
+

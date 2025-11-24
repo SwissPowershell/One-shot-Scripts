@@ -1,6 +1,7 @@
 # This script will analyse and try to register all systemapps manifests
 Class SystemAppsPackage {
     [String] $Name
+    hidden [String] $BaseName
     [String] $Version
     [String] $Executable
     [String] $EntryPoint
@@ -20,6 +21,7 @@ Class SystemAppsPackage {
         $this.Path = $path
         $this.manifestContent = [XML] (Get-Content -path $Path -ErrorAction Stop)
         $this.Name = $this.manifestContent.Package.Identity.Name
+        $this.BaseName = $this.manifestContent.Package.Identity.Name
         $this.Version = $this.manifestContent.Package.Identity.Version
         $this.Executable = try { $this.manifestContent.Package.Applications.Application.Executable.trim() }Catch{}
         $this.EntryPoint = try { $this.manifestContent.Package.Applications.Application.EntryPoint.trim() }Catch{}
@@ -38,8 +40,8 @@ Class SystemAppsPackage {
         # Last
 
         # if the name is a guid like string add (entrypoint) before name
-        if ($this.Name -match '^(?:\{[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}\}|\([0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}\)|[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}|[0-9A-Fa-f]{32})$') {
-            $this.Name = "($($this.EntryPoint)) $($this.Name)"
+        if ($this.BaseName -match '^(?:\{[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}\}|\([0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}\)|[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}|[0-9A-Fa-f]{32})$') {
+            $this.Name = "($($this.EntryPoint)) $($this.BaseName)"
         }
     }
     
@@ -53,17 +55,21 @@ $SystemAppsInfo = @{
 $AllManifests = Get-ChildItem @SystemAppsInfo | ForEach-Object {
     [SystemAppsPackage]::new($_.FullName)
 }
-$Answer = Read-Host "Found $($AllManifests.Count) system appx manifests. Type 'Y' to try to register all system apps or 'N' to exit."
+Write-Host "Found $($AllManifests.Count) system appx manifests. Type 'Y' to try to register all system apps or 'N' to exit: " -NoNewline
+$Answer = Read-Host
 if ($Answer -ne 'Y') {
     Write-Host "Exiting without registering any apps."
     Break
 }
+$O_ProgressPreference = $ProgressPreference
+$ProgressPreference = 'SilentlyContinue'
 foreach ($app in $AllManifests) {
-    Write-Host "Registering $($app.Name) ..."
+    Write-Host "Registering '$($app.Name)'" -ForegroundColor Yellow -NoNewline
     Try {
         Add-AppxPackage -Register $app.Path -DisableDevelopmentMode -ErrorAction Stop
-        Write-Host "Successfully registered $($app.Name)." -ForegroundColor Green
+        Write-Host " => Registered!" -ForegroundColor Green
     } Catch {
-        Write-Host "Failed to register $($app.Name). Error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host " => Failed to register $($app.Name). Error: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
+$ProgressPreference = $O_ProgressPreference
